@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>상북초 방과후영어 5학년가반복습파티~</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Jua&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Jua', 'Nunito', sans-serif;
+            background-color: #fdfbf7;
+            background-image: radial-gradient(#ffd1dc 2px, transparent 2px);
+            background-size: 30px 30px;
+            overscroll-behavior: none;
+        }
+        .cute-shadow {
+            box-shadow: 0 8px 0 #d1d5db;
+            transition: all 0.1s;
+        }
+        .cute-shadow:active {
+            box-shadow: 0 0 0 #d1d5db;
+            transform: translateY(8px);
+        }
+        .card-flip {
+            perspective: 1000px;
+        }
+        .card-inner {
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+        .card-flip.flipped .card-inner {
+            transform: rotateY(180deg);
+        }
+        .card-front, .card-back {
+            backface-visibility: hidden;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        .card-back {
+            transform: rotateY(180deg);
+        }
+        .timer-bar-container {
+            width: 100%;
+            height: 20px;
+            background-color: #e5e7eb;
+            border-radius: 9999px;
+            overflow: hidden;
+        }
+        .timer-bar {
+            height: 100%;
+            background-color: #fb7185;
+            transition: width 1s linear;
+        }
+        .hide { display: none !important; }
+        
+        /* Modal Styles */
+        .modal-overlay {
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(2px);
+        }
+        /* Mobile scrollbar hide - UI를 더 깔끔하게 */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: #fbcfe8; border-radius: 10px; }
+    </style>
+</head>
+<body class="h-[100dvh] w-full flex items-center justify-center p-2 sm:p-4 overflow-hidden">
+
+    <!-- App Container -->
+    <div id="app" class="bg-white w-full max-w-md rounded-3xl shadow-2xl border-4 border-pink-200 relative h-full max-h-[850px] flex flex-col overflow-hidden">
+        
+        <!-- Header -->
+        <div class="bg-pink-300 text-white text-center py-3 px-2 rounded-b-3xl shadow-md z-10 shrink-0">
+            <h1 class="text-lg md:text-xl font-bold tracking-wide">🎉 상북초 방과후영어<br>5학년가반 복습파티~</h1>
+            <div id="userInfo" class="hide mt-2 flex justify-between items-center px-4">
+                <span class="bg-white text-pink-500 px-3 py-1 rounded-full text-sm font-bold shadow" id="displayStudent"></span>
+                <span class="bg-yellow-400 text-yellow-900 px-3 py-1 rounded-full text-sm font-bold shadow">
+                    <i class="fas fa-star"></i> <span id="displayScore">0</span> Pts
+                </span>
+            </div>
+        </div>
+
+        <!-- Screen 1: Login / Setup -->
+        <div id="screenLogin" class="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 space-y-4 sm:space-y-6 overflow-y-auto">
+            <div class="text-5xl sm:text-6xl animate-bounce">🎈</div>
+            <div class="w-full">
+                <label class="block text-gray-700 font-bold mb-1 sm:mb-2 text-sm sm:text-base">내 이름 (Name)</label>
+                <input type="text" id="studentName" placeholder="이름을 입력하세요" class="w-full px-4 py-2 sm:py-3 rounded-xl border-2 border-pink-300 focus:outline-none focus:border-pink-500 text-base sm:text-lg text-center font-bold">
+            </div>
+            <div class="w-full">
+                <label class="block text-gray-700 font-bold mb-1 sm:mb-2 text-sm sm:text-base">단원 선택 (Unit)</label>
+                <div class="grid grid-cols-2 gap-2 sm:gap-4">
+                    <button class="unit-btn active bg-green-400 text-white py-2 sm:py-3 rounded-xl font-bold text-base sm:text-lg cute-shadow border-2 border-green-500" data-unit="5">Unit 5<br><span class="text-xs sm:text-sm font-normal">Running Together</span></button>
+                    <button class="unit-btn bg-gray-200 text-gray-600 py-2 sm:py-3 rounded-xl font-bold text-base sm:text-lg border-2 border-gray-300" data-unit="6">Unit 6<br><span class="text-xs sm:text-sm font-normal">A School Market</span></button>
+                </div>
+            </div>
+            <button id="startBtn" class="w-full bg-pink-500 hover:bg-pink-400 text-white font-bold py-3 sm:py-4 rounded-2xl text-lg sm:text-xl cute-shadow mt-2">
+                시작하기! (Start)
+            </button>
+        </div>
+
+        <!-- Screen 2: Main Menu -->
+        <div id="screenMenu" class="hide flex-1 flex flex-col items-center p-3 sm:p-6 space-y-2 sm:space-y-4 overflow-y-auto">
+            <h2 class="text-lg sm:text-2xl text-pink-600 mb-1 sm:mb-2 font-bold">어떤 활동을 할까요?</h2>
+            
+            <button class="menu-btn w-full bg-blue-100 border-4 border-blue-300 rounded-2xl p-3 sm:p-4 flex items-center space-x-3 sm:space-x-4 cute-shadow" data-activity="listen">
+                <div class="w-12 h-12 sm:w-16 sm:h-16 bg-blue-300 rounded-full flex items-center justify-center text-2xl sm:text-3xl shrink-0">🎙️</div>
+                <div class="text-left flex-1">
+                    <h3 class="text-base sm:text-xl font-bold text-blue-800">듣고 따라말하기</h3>
+                    <p class="text-xs sm:text-sm text-blue-600">문장을 듣고 말해봐요 (20 Pts)</p>
+                </div>
+            </button>
+
+            <button class="menu-btn w-full bg-green-100 border-4 border-green-300 rounded-2xl p-3 sm:p-4 flex items-center space-x-3 sm:space-x-4 cute-shadow" data-activity="spelling">
+                <div class="w-12 h-12 sm:w-16 sm:h-16 bg-green-300 rounded-full flex items-center justify-center text-2xl sm:text-3xl shrink-0">🔤</div>
+                <div class="text-left flex-1">
+                    <h3 class="text-base sm:text-xl font-bold text-green-800">스펠링 맞추기</h3>
+                    <p class="text-xs sm:text-sm text-green-600">빠진 글자를 찾아요! (50 Pts)</p>
+                </div>
+            </button>
+
+            <button class="menu-btn w-full bg-yellow-100 border-4 border-yellow-300 rounded-2xl p-3 sm:p-4 flex items-center space-x-3 sm:space-x-4 cute-shadow" data-activity="sentence">
+                <div class="w-12 h-12 sm:w-16 sm:h-16 bg-yellow-300 rounded-full flex items-center justify-center text-2xl sm:text-3xl shrink-0">🧩</div>
+                <div class="text-left flex-1">
+                    <h3 class="text-base sm:text-xl font-bold text-yellow-800">문장 순서 맞추기</h3>
+                    <p class="text-xs sm:text-sm text-yellow-600">단어를 조합해봐요 (50 Pts)</p>
+                </div>
+            </button>
+
+            <button class="menu-btn w-full bg-purple-100 border-4 border-purple-300 rounded-2xl p-3 sm:p-4 flex items-center space-x-3 sm:space-x-4 cute-shadow" data-activity="memory">
+                <div class="w-12 h-12 sm:w-16 sm:h-16 bg-purple-300 rounded-full flex items-center justify-center text-2xl sm:text-3xl shrink-0">🃏</div>
+                <div class="text-left flex-1">
+                    <h3 class="text-base sm:text-xl font-bold text-purple-800">짝맞추기 게임</h3>
+                    <p class="text-xs sm:text-sm text-purple-600">같은 카드를 찾아요 (10 Pts)</p>
+                </div>
+            </button>
+        </div>
+
+        <!-- Screen 3: Activity Container -->
+        <div id="screenActivity" class="hide flex-1 flex flex-col p-3 sm:p-4 overflow-y-auto">
+            <div class="flex justify-between items-center mb-4 shrink-0">
+                <button id="backBtn" class="bg-gray-200 px-4 py-2 rounded-lg font-bold text-gray-700 hover:bg-gray-300"><i class="fas fa-arrow-left"></i> 뒤로</button>
+                <div class="text-lg font-bold text-pink-500" id="activityTitle">Activity</div>
+                <div class="font-bold text-gray-500"><i class="fas fa-clock"></i> <span id="timeLeft">0</span>s</div>
+            </div>
+            
+            <div class="timer-bar-container mb-4 shrink-0">
+                <div id="timerBar" class="timer-bar w-full"></div>
+            </div>
+
+            <!-- Activity dynamic content area -->
+            <div id="activityContent" class="flex-1 flex flex-col items-center justify-start sm:justify-center text-center pb-8">
+                <!-- Content injected via JS -->
+            </div>
+        </div>
+
+        <!-- Custom Modal -->
+        <div id="customModal" class="fixed inset-0 modal-overlay z-50 hide flex items-center justify-center p-4">
+            <div class="bg-white rounded-3xl p-6 w-full max-w-sm text-center shadow-2xl border-4 border-pink-400 transform scale-95 transition-transform duration-200 flex flex-col max-h-[80vh]">
+                <div id="modalIcon" class="text-5xl mb-4 shrink-0">✨</div>
+                <h3 id="modalTitle" class="text-2xl font-bold mb-2 text-gray-800 shrink-0">Title</h3>
+                
+                <!-- 스크롤 가능한 메시지 영역 추가 (랭킹 표시용) -->
+                <div id="modalMessageContainer" class="overflow-y-auto mb-6 flex-1 text-left px-2">
+                    <p id="modalMessage" class="text-lg text-gray-600 text-center">Message</p>
+                </div>
+                
+                <button id="modalBtn" class="bg-pink-500 text-white font-bold py-3 px-8 rounded-xl cute-shadow text-lg w-full shrink-0">확인</button>
+            </div>
+        </div>
+        
+    </div>
+
+    <script type="module">
+        // 🌟 선생님의 구글 웹 앱 URL이 완벽하게 적용되었습니다! 🌟
+        const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbxaxZ7HcWkfyh9GQE5XPxNj-QFeE25-7wIV6aNpSk9m9QPuh1JLkr2eskRgt4tJ-VoRWA/exec"; 
+        
+        // Data Structure (교과서와 100% 동일)
+        const curriculum = {
+            "5": {
+                words: [
+                    { en: "race", ko: "경주", emoji: "🏃‍♀️" },
+                    { en: "trip", ko: "발이 걸려 넘어지다", emoji: "💥" },
+                    { en: "fall", ko: "넘어지다", emoji: "🤕" },
+                    { en: "hug", ko: "안다", emoji: "🫂" },
+                    { en: "clap", ko: "박수치다", emoji: "👏" },
+                    { en: "thumb", ko: "엄지손가락", emoji: "👍" },
+                    { en: "chair", ko: "의자", emoji: "🪑" },
+                    { en: "hair", ko: "머리카락", emoji: "💇‍♀️" },
+                    { en: "stairs", ko: "계단", emoji: "🪜" }
+                ],
+                sentences: [
+                    "The Olympics are here!",
+                    "These women run in a race.",
+                    "Nikki trips and falls.",
+                    "Abbey trips and falls too.",
+                    "Abbey helps Nikki up.",
+                    "They run together.",
+                    "Abbey falls again.",
+                    "Nikki helps her up.",
+                    "They hug each other at the finish line.",
+                    "Everyone claps for them."
+                ]
+            },
+            "6": {
+                words: [
+                    { en: "sell", ko: "팔다", emoji: "🏪" },
+                    { en: "ride", ko: "타다", emoji: "🚲" },
+                    { en: "buy", ko: "사다", emoji: "🛍️" },
+                    { en: "borrow", ko: "빌리다", emoji: "🤝" },
+                    { en: "wear", ko: "입다", emoji: "🧥" },
+                    { en: "coat", ko: "외투", emoji: "🧥" },
+                    { en: "sunglasses", ko: "선글라스", emoji: "🕶️" },
+                    { en: "skateboard", ko: "스케이트보드", emoji: "🛹" },
+                    { en: "backpack", ko: "배낭", emoji: "🎒" },
+                    { en: "glove", ko: "장갑", emoji: "🧤" }
+                ],
+                sentences: [
+                    "My school has a flea market.",
+                    "Amy sells her skateboard.",
+                    "It looks new.",
+                    "But I can't ride it.",
+                    "Jack sells his coat.",
+                    "It looks warm.",
+                    "But it is too big.",
+                    "Nancy sells her sunglasses.",
+                    "They look nice.",
+                    "I look like a movie star!",
+                    "I will buy them!",
+                    "She sells coat.",
+                    "She sells sunglasses."
+                ]
+            }
+        };
+
+        let state = {
+            studentName: "",
+            unit: "5",
+            score: 0,
+            timer: null,
+            timeRemaining: 0,
+            currentActivity: null,
+            currentQuestionIndex: 0,
+            shuffledQuestions: []
+        };
+
+        // DOM Elements
+        const screens = {
+            login: document.getElementById('screenLogin'),
+            menu: document.getElementById('screenMenu'),
+            activity: document.getElementById('screenActivity')
+        };
+        const els = {
+            startBtn: document.getElementById('startBtn'),
+            unitBtns: document.querySelectorAll('.unit-btn'),
+            nameInput: document.getElementById('studentName'),
+            userInfo: document.getElementById('userInfo'),
+            displayStudent: document.getElementById('displayStudent'),
+            displayScore: document.getElementById('displayScore'),
+            menuBtns: document.querySelectorAll('.menu-btn'),
+            backBtn: document.getElementById('backBtn'),
+            activityTitle: document.getElementById('activityTitle'),
+            activityContent: document.getElementById('activityContent'),
+            timeLeft: document.getElementById('timeLeft'),
+            timerBar: document.getElementById('timerBar')
+        };
+
+        // Utilities
+        function showScreen(screenName) {
+            Object.values(screens).forEach(s => s.classList.add('hide'));
+            screens[screenName].classList.remove('hide');
+        }
+
+        // 모달창 개선: 내용이 길어지면 왼쪽 정렬되도록 조정 (랭킹용)
+        function showModal(title, message, icon = "✨", callback = null, isRanking = false) {
+            const modal = document.getElementById('customModal');
+            document.getElementById('modalTitle').innerText = title;
+            document.getElementById('modalIcon').innerText = icon;
+            
+            const msgEl = document.getElementById('modalMessage');
+            
+            if(isRanking) {
+                // 랭킹일 경우 HTML 구조 그대로 렌더링하고 왼쪽 정렬
+                msgEl.innerHTML = message;
+                msgEl.classList.remove('text-center');
+                msgEl.classList.add('text-left');
+            } else {
+                // 일반 메시지일 경우 텍스트만 넣고 가운데 정렬
+                msgEl.innerText = message;
+                msgEl.classList.remove('text-left');
+                msgEl.classList.add('text-center');
+            }
+            
+            modal.classList.remove('hide');
+            
+            const btn = document.getElementById('modalBtn');
+            btn.onclick = () => {
+                modal.classList.add('hide');
+                if (callback) callback();
+            };
+        }
+
+        function addScore(points) {
+            state.score += points;
+            els.displayScore.innerText = state.score;
+            els.displayScore.classList.add('text-green-500', 'scale-150');
+            setTimeout(() => els.displayScore.classList.remove('text-green-500', 'scale-150'), 500);
+        }
+
+        function shuffle(array) {
+            let currentIndex = array.length,  randomIndex;
+            while (currentIndex != 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        // Timer Logic
+        function startTimer(seconds, onTimeout) {
+            clearInterval(state.timer);
+            state.timeRemaining = seconds;
+            els.timeLeft.innerText = state.timeRemaining;
+            els.timerBar.style.width = '100%';
+            els.timerBar.style.transition = 'none';
+            
+            // Force reflow
+            void els.timerBar.offsetWidth; 
+            
+            els.timerBar.style.transition = `width ${seconds}s linear`;
+            els.timerBar.style.width = '0%';
+
+            state.timer = setInterval(() => {
+                state.timeRemaining--;
+                els.timeLeft.innerText = state.timeRemaining;
+                if (state.timeRemaining <= 0) {
+                    clearInterval(state.timer);
+                    onTimeout();
+                }
+            }, 1000);
+        }
+
+        function stopTimer() {
+            clearInterval(state.timer);
+            els.timerBar.style.transition = 'none';
+        }
+
+        // 구글 시트로 결과 보내기!
+        function saveResult(activityName, pointsEarned) {
+            if (GOOGLE_SHEET_URL === "여기에_선생님의_웹_앱_URL을_붙여넣으세요") {
+                console.log("구글 시트 URL이 설정되지 않아 점수가 저장되지 않습니다.");
+                return; 
+            }
+
+            // 폼 데이터 생성 (URL 파라미터 방식으로 변경하여 안정성 확보)
+            const params = new URLSearchParams();
+            params.append('이름', state.studentName);
+            params.append('단원', 'Unit ' + state.unit);
+            params.append('활동', activityName);
+            params.append('점수', pointsEarned);
+            params.append('시간', new Date().toLocaleString()); // 구글 스크립트 쪽 수정 없이 시간 기록
+
+            // POST 요청 (안전하게 백그라운드에서 전송)
+            fetch(GOOGLE_SHEET_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: params.toString()
+            })
+            .then(response => console.log('점수 전송 완료!'))
+            .catch(error => console.error('전송 에러!', error.message));
+        }
+        
+        // 🏆 랭킹 가져오기 기능 🏆
+        function fetchAndShowRanking() {
+            showModal("불러오는 중...", "명예의 전당 기록을 가져오고 있어요 🏃‍♂️💨", "⏳");
+            document.getElementById('modalBtn').disabled = true; // 로딩 중 버튼 비활성화
+
+            // 구글 앱스 스크립트에서 데이터를 GET 방식으로 가져옴
+            // (주의: 구글 앱스 스크립트 쪽에 doGet 함수가 필요하지만, 
+            // 현재 doPost만 있으므로, 여기서는 임시 시각화만 하거나 나중에 추가 확장이 가능하도록 틀을 짭니다)
+            
+            // ★선생님 참고: 현재 구글 시트 코드는 '쓰기(POST)' 전용입니다. 
+            // '읽기(GET)' 기능을 추가하려면 Apps Script를 조금 수정해야 합니다. 
+            // 당장은 에러가 나지 않도록, 그리고 아이들에게 동기부여를 할 수 있도록
+            // '현재 세션'의 점수만이라도 예쁘게 보여주는 임시 랭킹판을 띄워줍니다.
+            
+            setTimeout(() => {
+                document.getElementById('modalBtn').disabled = false;
+                
+                let rankingHTML = `
+                    <div class="bg-yellow-50 p-4 rounded-xl border-2 border-yellow-200 mb-4">
+                        <div class="font-bold text-gray-700 text-center mb-2">⭐ 오늘의 내 기록 ⭐</div>
+                        <div class="flex justify-between items-center text-lg">
+                            <span>접속: <span class="font-bold text-blue-600">1</span>회</span>
+                            <span>점수: <span class="font-bold text-pink-600">${state.score}</span> Pts</span>
+                        </div>
+                    </div>
+                    <div class="text-sm text-gray-500 text-center">
+                        * 전체 누적 랭킹은 선생님이 별도로 알려주실 거예요! <br>가장 많이 복습한 친구에게 상이 있어요 🎁
+                    </div>
+                `;
+                
+                showModal("🏆 명예의 전당 🏆", rankingHTML, "👑", null, true);
+            }, 1000);
+        }
+
+        // Setup Event Listeners
+        els.unitBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                els.unitBtns.forEach(b => {
+                    b.classList.remove('bg-green-400', 'text-white', 'border-green-500', 'active');
+                    b.classList.add('bg-gray-200', 'text-gray-600', 'border-gray-300');
+                });
+                const target = e.currentTarget;
+                target.classList.remove('bg-gray-200', 'text-gray-600', 'border-gray-300');
+                target.classList.add('bg-green-400', 'text-white', 'border-green-500', 'active');
+                state.unit = target.dataset.unit;
+            });
+        });
+
+        els.startBtn.addEventListener('click', () => {
+            const name = els.nameInput.value.trim();
+            if (!name) {
+                showModal("잠깐!", "이름을 입력해주세요!", "🥺");
+                return;
+            }
+            state.studentName = name;
+            
+            els.displayStudent.innerText = state.studentName;
+            els.userInfo.classList.remove('hide');
+            showScreen('menu');
+        });
+
+        els.backBtn.addEventListener('click', () => {
+            stopTimer();
+            showScreen('menu');
+        });
+
+        els.menuBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const act = e.currentTarget.dataset.activity;
+                startActivity(act);
+            });
+        });
+        
+        // 명예의 전당 버튼 추가 및 이벤트 연결
+        const rankingBtnHTML = `
+            <button id="rankingBtn" class="w-full bg-gradient-to-r from-yellow-300 to-yellow-500 text-yellow-900 font-bold py-3 sm:py-4 rounded-2xl text-lg sm:text-xl cute-shadow mt-4 border-2 border-yellow-600 flex items-center justify-center gap-2">
+                <i class="fas fa-trophy"></i> 명예의 전당 보기
+            </button>
+        `;
+        document.getElementById('screenMenu').insertAdjacentHTML('beforeend', rankingBtnHTML);
+        document.getElementById('rankingBtn').addEventListener('click', fetchAndShowRanking);
+
+        function startActivity(activity) {
+            state.currentActivity = activity;
+            showScreen('activity');
+            els.activityContent.innerHTML = '';
+            
+            const titles = {
+                listen: "🎙️ 듣고 따라말하기 (30s)",
+                spelling: "🔤 스펠링 맞추기 (10s)",
+                sentence: "🧩 문장 순서 맞추기 (30s)",
+                memory: "🃏 짝맞추기 게임 (60s)"
+            };
+            els.activityTitle.innerText = titles[activity];
+
+            if (activity === 'listen') initListen();
+            else if (activity === 'spelling') initSpelling();
+            else if (activity === 'sentence') initSentence();
+            else if (activity === 'memory') initMemory();
+        }
+
+        // 1. Listen & Repeat
+        function initListen() {
+            state.shuffledQuestions = shuffle([...curriculum[state.unit].sentences]);
+            state.currentQuestionIndex = 0;
+            renderListenQuestion();
+        }
+
+        function renderListenQuestion() {
+            if (state.currentQuestionIndex >= state.shuffledQuestions.length) {
+                showModal("최고예요!", "모든 문장을 다 말했어요!", "🏆", () => showScreen('menu'));
+                return;
+            }
+
+            const sentence = state.shuffledQuestions[state.currentQuestionIndex];
+            
+            els.activityContent.innerHTML = `
+                <div class="bg-blue-50 p-6 rounded-2xl border-4 border-blue-200 w-full mb-6 mt-4">
+                    <p class="text-2xl font-bold text-gray-800 mb-4 break-words" id="targetSentence">${sentence}</p>
+                    <button id="playAudioBtn" class="bg-blue-400 text-white p-4 rounded-full cute-shadow mx-2"><i class="fas fa-volume-up text-2xl"></i></button>
+                </div>
+                <div class="text-sm text-gray-500 mb-2">마이크 버튼을 누르고 따라 말하세요!</div>
+                <button id="recordBtn" class="bg-red-500 hover:bg-red-400 text-white w-20 h-20 rounded-full cute-shadow flex items-center justify-center text-3xl transition-transform shrink-0">
+                    <i class="fas fa-microphone"></i>
+                </button>
+                <div id="recordFeedback" class="mt-4 font-bold text-[1rem] min-h-[2rem] text-blue-600 px-2 break-keep"></div>
+            `;
+
+            const playBtn = document.getElementById('playAudioBtn');
+            const recordBtn = document.getElementById('recordBtn');
+            const feedback = document.getElementById('recordFeedback');
+
+            playBtn.onclick = () => {
+                const utterance = new SpeechSynthesisUtterance(sentence);
+                utterance.lang = 'en-US';
+                utterance.rate = 0.8; // slightly slower for kids
+                speechSynthesis.speak(utterance);
+            };
+
+            // Speech Recognition Setup - Safe for Mobile
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                feedback.innerHTML = "<span class='text-sm text-red-500'>아이폰 등 이 기기에서는 마이크 인식이 안 돼요😭<br>세 번 듣고 큰 소리로 따라한 뒤 [확인]을 누르세요!</span>";
+                recordBtn.innerHTML = "<i class='fas fa-check'></i>";
+                recordBtn.classList.remove('bg-red-500', 'hover:bg-red-400');
+                recordBtn.classList.add('bg-green-500', 'hover:bg-green-400');
+                
+                recordBtn.onclick = () => {
+                    stopTimer();
+                    addScore(20);
+                    saveResult('Listen', 20);
+                    feedback.innerHTML = "<span class='text-green-500'>잘했어요! +20 Pts</span>";
+                    recordBtn.disabled = true;
+                    setTimeout(() => {
+                        state.currentQuestionIndex++;
+                        renderListenQuestion();
+                    }, 1500);
+                };
+            } else {
+                const recognition = new SpeechRecognition();
+                recognition.lang = 'en-US';
+                recognition.interimResults = false;
+                recognition.maxAlternatives = 1;
+
+                recordBtn.onclick = () => {
+                    try {
+                        recognition.start();
+                        recordBtn.classList.add('animate-pulse', 'scale-110');
+                        feedback.innerHTML = "<span class='text-blue-500'>말씀해주세요! 듣고 있어요...</span>";
+                    } catch (e) {
+                        feedback.innerText = "마이크 버튼을 다시 한 번 눌러주세요!";
+                    }
+                };
+
+                recognition.onspeechend = () => {
+                    recognition.stop(); 
+                    recordBtn.classList.remove('animate-pulse', 'scale-110');
+                };
+
+                recognition.onresult = (event) => {
+                    recognition.stop(); 
+                    recordBtn.classList.remove('animate-pulse', 'scale-110');
+                    
+                    const transcript = event.results[0][0].transcript.toLowerCase().replace(/[.,!?'"]/g, '').trim();
+                    const cleanTarget = sentence.toLowerCase().replace(/[.,!?'"]/g, '').trim();
+                    
+                    feedback.innerText = `내 목소리: "${transcript}"`;
+                    
+                    const tWords = transcript.split(' ');
+                    const cWords = cleanTarget.split(' ');
+                    let matchCount = 0;
+                    cWords.forEach(cw => {
+                        if(tWords.includes(cw)) matchCount++;
+                    });
+                    
+                    if (matchCount >= Math.max(1, Math.floor(cWords.length / 2)) || transcript.includes(cleanTarget)) {
+                        stopTimer();
+                        addScore(20);
+                        saveResult('Listen', 20);
+                        feedback.innerHTML = "<span class='text-green-500'>Excellent! +20 Pts</span>";
+                        setTimeout(() => {
+                            state.currentQuestionIndex++;
+                            renderListenQuestion();
+                        }, 1500);
+                    } else {
+                        feedback.innerHTML = "<span class='text-red-500'>다시 한번 시도해볼까요? (버튼 다시 클릭)</span>";
+                    }
+                };
+                
+                recognition.onerror = (event) => {
+                    recognition.stop();
+                    recordBtn.classList.remove('animate-pulse', 'scale-110');
+                    if(event.error === 'no-speech') {
+                         feedback.innerHTML = "<span class='text-red-500'>소리가 안 들렸어요. 다시 눌러보세요.</span>";
+                    } else {
+                         feedback.innerHTML = "<span class='text-red-500'>잘 안 들려요. 다시 시도해주세요.</span>";
+                    }
+                };
+            }
+
+            startTimer(30, () => {
+                showModal("시간 초과!", "다음 문장으로 넘어갑니다.", "⏰", () => {
+                    state.currentQuestionIndex++;
+                    renderListenQuestion();
+                });
+            });
+        }
+
+        // 2. Missing Letters (No Hints)
+        function initSpelling() {
+            // New logic: Randomly select words every login
+            const allWords = shuffle([...curriculum[state.unit].words]);
+            state.shuffledQuestions = allWords.slice(0, 5); // Pick 5 random words
+            state.currentQuestionIndex = 0;
+            renderSpellingQuestion();
+        }
+
+        function renderSpellingQuestion() {
+            if (state.currentQuestionIndex >= state.shuffledQuestions.length) {
+                showModal("스펠링 마스터!", "단어를 완벽하게 외웠군요!", "🏆", () => showScreen('menu'));
+                return;
+            }
+
+            const wordObj = state.shuffledQuestions[state.currentQuestionIndex];
+            const word = wordObj.en;
+            
+            // Create blanks visually
+            let displayWord = "";
+            let numBlanks = Math.max(1, Math.floor(word.length / 2)); 
+            let blankIndices = [];
+            while(blankIndices.length < numBlanks) {
+                let r = Math.floor(Math.random() * word.length);
+                if(blankIndices.indexOf(r) === -1) blankIndices.push(r);
+            }
+            
+            for(let i=0; i<word.length; i++) {
+                if(blankIndices.includes(i)) displayWord += "_ ";
+                else displayWord += word[i] + " ";
+            }
+
+            els.activityContent.innerHTML = `
+                <div class="text-6xl mb-4">${wordObj.emoji}</div>
+                <div class="text-xl text-gray-500 mb-2 font-bold">${wordObj.ko}</div>
+                <div class="text-4xl font-bold tracking-widest text-green-600 mb-8 bg-green-50 p-4 rounded-xl inline-block border-2 border-green-200">
+                    ${displayWord}
+                </div>
+                <div class="w-full max-w-xs">
+                    <input type="text" id="spellingInput" autocomplete="off" autocorrect="off" spellcheck="false" 
+                           placeholder="정확한 단어를 입력하세요" 
+                           class="w-full px-4 py-3 rounded-xl border-4 border-green-300 focus:outline-none focus:border-green-500 text-2xl text-center font-bold mb-4">
+                    <button id="checkSpellingBtn" class="w-full bg-green-500 text-white font-bold py-3 rounded-xl cute-shadow text-xl">확인</button>
+                </div>
+                <div id="spellingFeedback" class="mt-4 font-bold text-lg h-8"></div>
+            `;
+
+            const input = document.getElementById('spellingInput');
+            const checkBtn = document.getElementById('checkSpellingBtn');
+            const feedback = document.getElementById('spellingFeedback');
+            
+            setTimeout(() => input.focus(), 100);
+
+            const verifySpelling = () => {
+                const answer = input.value.trim().toLowerCase();
+                if (answer === word) {
+                    stopTimer();
+                    addScore(50);
+                    saveResult('Spelling', 50);
+                    feedback.innerHTML = "<span class='text-green-500'>Perfect! +50 Pts</span>";
+                    checkBtn.disabled = true;
+                    setTimeout(() => {
+                        state.currentQuestionIndex++;
+                        renderSpellingQuestion();
+                    }, 1000);
+                } else {
+                    feedback.innerHTML = "<span class='text-red-500'>틀렸어요! 다시 시도!</span>";
+                    input.value = "";
+                    input.focus();
+                }
+            };
+
+            checkBtn.onclick = verifySpelling;
+            input.onkeypress = (e) => { if(e.key === 'Enter') verifySpelling(); };
+
+            startTimer(10, () => {
+                feedback.innerHTML = `<span class='text-red-500'>정답은: ${word}</span>`;
+                setTimeout(() => {
+                    state.currentQuestionIndex++;
+                    renderSpellingQuestion();
+                }, 2000);
+            });
+        }
+
+        // 3. Sentence Unscramble
+        function initSentence() {
+            state.shuffledQuestions = shuffle([...curriculum[state.unit].sentences]).slice(0, 4);
+            state.currentQuestionIndex = 0;
+            renderSentenceQuestion();
+        }
+
+        function renderSentenceQuestion() {
+            if (state.currentQuestionIndex >= state.shuffledQuestions.length) {
+                showModal("문장 마스터!", "훌륭한 작문 실력이네요!", "🏆", () => showScreen('menu'));
+                return;
+            }
+
+            const sentence = state.shuffledQuestions[state.currentQuestionIndex];
+            // Remove punctuation for game
+            const cleanSentence = sentence.replace(/[.,!]/g, '');
+            const words = cleanSentence.split(' ');
+            const shuffledWords = shuffle([...words]);
+            let selectedWords = [];
+
+            els.activityContent.innerHTML = `
+                <div class="w-full bg-yellow-50 min-h-[100px] border-4 border-yellow-300 rounded-2xl p-4 mb-8 flex flex-wrap gap-2 items-center justify-center shadow-inner" id="answerArea">
+                    <!-- Selected words go here -->
+                </div>
+                <div class="w-full flex flex-wrap gap-3 justify-center" id="wordBankArea">
+                    <!-- Word buttons go here -->
+                </div>
+                <div class="mt-8 flex gap-4 w-full max-w-xs">
+                    <button id="resetBtn" class="flex-1 bg-gray-300 text-gray-700 font-bold py-2 rounded-xl cute-shadow">다시</button>
+                    <button id="checkSentenceBtn" class="flex-1 bg-yellow-400 text-yellow-900 font-bold py-2 rounded-xl cute-shadow">확인</button>
+                </div>
+                <div id="sentenceFeedback" class="mt-4 font-bold text-lg h-8"></div>
+            `;
+
+            const answerArea = document.getElementById('answerArea');
+            const wordBankArea = document.getElementById('wordBankArea');
+            const resetBtn = document.getElementById('resetBtn');
+            const checkBtn = document.getElementById('checkSentenceBtn');
+            const feedback = document.getElementById('sentenceFeedback');
+
+            const updateUI = () => {
+                answerArea.innerHTML = selectedWords.map((w, i) => 
+                    `<div class="bg-white px-4 py-2 rounded-lg font-bold text-lg shadow border border-gray-200 cursor-pointer" onclick="removeWord(${i})">${w}</div>`
+                ).join('');
+                
+                // Expose removeWord to global window for inline onclick
+                window.removeWord = (index) => {
+                    const word = selectedWords.splice(index, 1)[0];
+                    shuffledWords.push(word);
+                    updateUI();
+                };
+
+                wordBankArea.innerHTML = shuffledWords.map((w, i) => 
+                    `<button class="bg-yellow-200 hover:bg-yellow-300 text-yellow-900 px-4 py-2 rounded-lg font-bold text-lg cute-shadow border-2 border-yellow-400" onclick="addWord(${i})">${w}</button>`
+                ).join('');
+
+                window.addWord = (index) => {
+                    const word = shuffledWords.splice(index, 1)[0];
+                    selectedWords.push(word);
+                    updateUI();
+                };
+            };
+
+            updateUI();
+
+            resetBtn.onclick = () => {
+                shuffledWords.push(...selectedWords);
+                selectedWords = [];
+                updateUI();
+            };
+
+            checkBtn.onclick = () => {
+                const currentAnswer = selectedWords.join(' ').toLowerCase();
+                if (currentAnswer === cleanSentence.toLowerCase()) {
+                    stopTimer();
+                    addScore(50);
+                    saveResult('Sentence', 50);
+                    feedback.innerHTML = "<span class='text-green-500'>Great Job! +50 Pts</span>";
+                    checkBtn.disabled = true;
+                    setTimeout(() => {
+                        state.currentQuestionIndex++;
+                        renderSentenceQuestion();
+                    }, 1500);
+                } else {
+                    feedback.innerHTML = "<span class='text-red-500'>순서가 틀렸어요. 다시 해보세요!</span>";
+                }
+            };
+
+            startTimer(30, () => {
+                feedback.innerHTML = `<span class='text-red-500'>정답: ${sentence}</span>`;
+                setTimeout(() => {
+                    state.currentQuestionIndex++;
+                    renderSentenceQuestion();
+                }, 2500);
+            });
+        }
+
+        // 4. Memory Game
+        function initMemory() {
+            // 로그인/시작할 때마다 전체 단어를 무작위로 섞은 후 6개를 새롭게 추출
+            const allWords = [...curriculum[state.unit].words];
+            const shuffledAllWords = shuffle(allWords);
+            const selectedWords = shuffledAllWords.slice(0, 6);
+            
+            let cards = [];
+            selectedWords.forEach((w, id) => {
+                cards.push({ id, type: 'en', content: w.en, emoji: w.emoji });
+                cards.push({ id, type: 'ko', content: w.ko, emoji: w.emoji });
+            });
+            
+            // 추출된 12장의 카드를 최종 섞기
+            cards = shuffle(cards);
+
+            els.activityContent.innerHTML = `
+                <div class="grid grid-cols-3 gap-3 w-full" id="memoryGrid"></div>
+            `;
+
+            const grid = document.getElementById('memoryGrid');
+            let flippedCards = [];
+            let matchedPairs = 0;
+            let isLocked = false;
+
+            cards.forEach((card, index) => {
+                const cardEl = document.createElement('div');
+                cardEl.className = 'card-flip w-full aspect-square cursor-pointer';
+                cardEl.innerHTML = `
+                    <div class="card-inner w-full h-full relative" data-index="${index}" data-id="${card.id}">
+                        <div class="card-front bg-purple-300 rounded-xl border-4 border-purple-400 flex items-center justify-center cute-shadow">
+                            <span class="text-3xl text-white font-bold">?</span>
+                        </div>
+                        <div class="card-back bg-white rounded-xl border-4 border-purple-400 flex flex-col items-center justify-center p-2 shadow-inner">
+                            <span class="text-2xl mb-1">${card.type === 'en' ? '' : card.emoji}</span>
+                            <span class="text-sm md:text-base font-bold text-purple-900 text-center break-words w-full leading-tight">${card.content}</span>
+                        </div>
+                    </div>
+                `;
+
+                cardEl.onclick = () => {
+                    if (isLocked) return;
+                    const inner = cardEl.querySelector('.card-inner');
+                    if (cardEl.classList.contains('flipped')) return;
+
+                    cardEl.classList.add('flipped');
+                    flippedCards.push({ el: cardEl, inner: inner });
+
+                    if (flippedCards.length === 2) {
+                        isLocked = true;
+                        const id1 = flippedCards[0].inner.dataset.id;
+                        const id2 = flippedCards[1].inner.dataset.id;
+
+                        if (id1 === id2) {
+                            addScore(10);
+                            matchedPairs++;
+                            flippedCards[0].el.classList.add('opacity-50');
+                            flippedCards[1].el.classList.add('opacity-50');
+                            flippedCards = [];
+                            isLocked = false;
+                            if (matchedPairs === 6) {
+                                stopTimer();
+                                saveResult('Memory', matchedPairs * 10);
+                                setTimeout(() => {
+                                    showModal("축하합니다!", "모든 짝을 찾았어요!", "🎉", () => showScreen('menu'));
+                                }, 500);
+                            }
+                        } else {
+                            setTimeout(() => {
+                                flippedCards[0].el.classList.remove('flipped');
+                                flippedCards[1].el.classList.remove('flipped');
+                                flippedCards = [];
+                                isLocked = false;
+                            }, 800);
+                        }
+                    }
+                };
+                grid.appendChild(cardEl);
+            });
+
+            startTimer(60, () => {
+                saveResult('Memory', matchedPairs * 10);
+                showModal("시간 초과!", `${matchedPairs}쌍을 찾았네요!`, "⏳", () => showScreen('menu'));
+            });
+        }
+    </script>
+</body>
+</html>
